@@ -18,12 +18,13 @@ const int down = 3;
 const int left = 4;
 */
 
-const int ANT = 1;
+
 
 const int doodleStarveTime = 3; //starve time of doodlebug
 const int doodleBreedTimer = 8; //Doodlebug breeding time
 
 const int antBreedTimer = 3; //Ant breeding time
+
 
 const int griddim = 20;
 typedef Organism* OrganismPtr;
@@ -54,13 +55,13 @@ protected:
 	GamePtr currGame;
 	int x;
 	int y;
-	int timeToBreed;
+	int breedTimeCount;
 	int stepCount;
 	bool validCoordinate(int x, int y) const;
-	vector<int> isMoveFree(int x, int y) const;
 	void testCoordinate(int& x, int& y, int move) const;
+	vector<int> isMoveFree(int x, int y);
 public:
-	Organism() :currGame(nullptr), x(0), y(0), timeToBreed(0), stepCount(0) {}
+	Organism() :currGame(nullptr), x(0), y(0), breedTimeCount(0), stepCount(0) {}
 	Organism(GamePtr currGame, int x, int y);
 	virtual void breed() = 0;
 	virtual void move();
@@ -76,7 +77,7 @@ public:
 	Ant() :Organism() {}
 	Ant(GamePtr currGame, int x, int y);
 	void breed();
-	int organismType() { return ANT; } //1 is an ant
+	int organismType() { return 1; } //1 is an ant
 private:
 	int breedTimeCount;
 
@@ -123,20 +124,19 @@ void Game::startGame() {
 	{
 		x = RandNum(0, griddim - 1);
 		y = RandNum(0, griddim - 1);
-		if (worldGrid[x][y] != nullptr)
-		{
-			worldGrid[x][y] = new Doodlebug(this, x, y);
-		}
+		if (worldGrid[x][y] != nullptr) continue;
+		worldGrid[x][y] = new Doodlebug(this, x, y);
+
 		doodlebugs++;
 	}
 	while (ants < 100)
 	{
 		x = RandNum(0, griddim - 1);
 		y = RandNum(0, griddim - 1);
-		if (worldGrid[x][y] != nullptr)
-		{
-			worldGrid[x][y] = new Ant(this, x, y);
-		}
+		if (worldGrid[x][y] != nullptr) continue;
+
+		worldGrid[x][y] = new Ant(this, x, y);
+
 		ants++;
 	}
 
@@ -165,6 +165,7 @@ void Game::nextStepCount() {
 			if (worldGrid[x][y] == nullptr) continue;
 			if (worldGrid[x][y]->organismType() == 1)
 				worldGrid[x][y]->move();
+
 		}
 	}
 
@@ -184,8 +185,10 @@ void Game::nextStepCount() {
 		for (int y = 0; y < griddim; y++)
 		{
 			if (worldGrid[x][y] == nullptr) continue;
-			if (worldGrid[x][y]->starve())
-				worldGrid[x][y] = nullptr; //should I delete worldGrid to reset it?
+			if (worldGrid[x][y]->starve()) {
+				delete worldGrid[x][y];
+				worldGrid[x][y] = nullptr; 
+			}
 
 		}
 	}
@@ -203,16 +206,19 @@ void Game::printGrid() {
 		{
 			if (worldGrid[x][y] == nullptr)
 				cout << '-';
-			else if (worldGrid[x][y]->organismType() == ANT)
+			else if (worldGrid[x][y]->organismType() == 1)
 				cout << 'o';
 			else
 				cout << 'X';
 
 		}
+		cout << "\n";
 	}
 
 
 }
+
+
 
 
 Organism::Organism(GamePtr currGame, int x, int y) {
@@ -220,13 +226,13 @@ Organism::Organism(GamePtr currGame, int x, int y) {
 	this->x = x;
 	this->y = y;
 	stepCount = currGame->stepCount;
-	timeToBreed = 0;
+	breedTimeCount = 0;
 }
 
 void Organism::move() {
 	if (stepCount == currGame->stepCount) return;
 	stepCount++;
-	timeToBreed--;
+	breedTimeCount--;
 	int randomMove = currGame->RandNum(1, 4);
 	int newX = x;
 	int newY = y;
@@ -241,30 +247,7 @@ void Organism::move() {
 
 }
 
-vector<int> Organism::isMoveFree(int x, int y) const {
-	vector<int> setOfMoves;
-	int tempX, tempY;
-	for (int move = 1; move <= 4; move++) {
-		tempX = x;
-		tempY = y;
-		testCoordinate(tempX, tempY, move);
-		if (!validCoordinate(tempX, tempY)) continue;
-		if (currGame->worldGrid[tempX][tempY] == nullptr) {
-			setOfMoves.push_back(move);
-			cout << "valid" << endl;
-		}
-	}
-	return setOfMoves;
-}
-
-bool Organism::validCoordinate(int x, int y) const {
-	if (x > 0 || x < griddim || y>0 || y < griddim) {
-		return true;
-	}
-	return false;
-}
-
-void Organism::testCoordinate(int& x, int& y, int move) const {
+void Organism::testCoordinate(int& x, int& y, int move) const  {
 	/*
 	const int up = 1;
 	const int right = 2;
@@ -277,6 +260,30 @@ void Organism::testCoordinate(int& x, int& y, int move) const {
 	if (move == 4) x--;
 
 }
+
+vector<int> Organism::isMoveFree(int x, int y)  {
+	vector<int> setOfMoves;
+	int tempX, tempY;
+	for (int move = 1; move <= 4; move++) {
+		tempX = x;
+		tempY = y;
+		testCoordinate(tempX, tempY, move);
+		if (!validCoordinate(tempX, tempY)) continue;
+		if (currGame->worldGrid[tempX][tempY] == nullptr) {
+			setOfMoves.push_back(move);
+		}
+	}
+	return setOfMoves;
+}
+
+bool Organism::validCoordinate(int x, int y) const {
+	if (x < 0 || x >= griddim || y<0 || y >= griddim) {
+		return false;
+	}
+	return true;
+}
+
+
 
 
 
@@ -318,15 +325,15 @@ vector<int> Doodlebug::validMovesToAnts(int x, int y) const {
 		testCoordinate(tempX, tempY, move);
 		if (!validCoordinate(tempX, tempY)) continue;
 		if (currGame->worldGrid[tempX][tempY] == nullptr) continue;
-		if (currGame->worldGrid[tempX][tempY]->organismType() == 1) {
+		if (currGame->worldGrid[tempX][tempY]->organismType() == 1)
 			setOfMoves.push_back(move);
-		}
+
 	}
 	return setOfMoves;
 }
 
 void Doodlebug::move() {
-	if (stepCount = currGame->stepCount) return;
+	if (stepCount == currGame->stepCount) return;
 	vector<int> antEatingMove = validMovesToAnts(x, y);
 	if (antEatingMove.size() == 0) {
 		Organism::move();
@@ -375,7 +382,6 @@ int main() {
 
 	}
 
-	cout << "hel";
 }
 
 
