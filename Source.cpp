@@ -232,7 +232,6 @@ Organism::Organism(GamePtr currGame, int x, int y) {
 void Organism::move() {
 	if (stepCount == currGame->stepCount) return;
 	stepCount++;
-	breedTimeCount--;
 	int randomMove = currGame->RandNum(1, 4);
 	int newX = x;
 	int newY = y;
@@ -283,18 +282,13 @@ bool Organism::validCoordinate(int x, int y) const {
 	return true;
 }
 
-
-
-
-
-
-
 Ant::Ant(GamePtr currGame, int x, int y) :Organism(currGame, x, y)
 {
 	breedTimeCount = antBreedTimer;
 }
 
 void Ant::breed() {
+	breedTimeCount--;
 	if (breedTimeCount > 0) return;
 	vector<int> validMoves = isMoveFree(x, y);
 	if (validMoves.size() == 0) return;
@@ -355,6 +349,7 @@ void Doodlebug::move() {
 }
 
 void Doodlebug::breed() {
+	breedTimeCount--;
 	if (breedTimeCount > 0) return;
 	vector<int> validMoves = isMoveFree(x, y);
 	if (validMoves.size() == 0) return;
