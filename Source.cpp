@@ -17,9 +17,13 @@ const int right = 2;
 const int down = 3;
 const int left = 4;
 */
-fewf
-oasnd; fio
-sodiifnaog
+
+const int ANT = 1;
+
+const int doodleStarveTime = 3; //starve time of doodlebug
+const int doodleBreedTimer = 8; //Doodlebug breeding time
+
+const int antBreedTimer = 3; //Ant breeding time
 
 const int griddim = 20;
 typedef Organism* OrganismPtr;
@@ -33,15 +37,68 @@ class Game
 private:
 	OrganismPtr worldGrid[griddim][griddim];
 	int stepCount = 0;
+	int RandNum(int start, int end) const;
 
 public:
 	Game();
 	void nextStepCount();
 	void printGrid();
-	int RandNum(int start, int end) const;
 	void startGame();
 
 };
+
+
+class Organism {
+
+protected:
+	GamePtr currGame;
+	int x;
+	int y;
+	int timeToBreed;
+	int stepCount;
+	bool validCoordinate(int x, int y) const;
+	vector<int> isMoveFree(int x, int y) const;
+	void testCoordinate(int& x, int& y, int move) const;
+public:
+	Organism() :currGame(nullptr), x(0), y(0), timeToBreed(0), stepCount(0) {}
+	Organism(GamePtr currGame, int x, int y);
+	virtual void breed() = 0;
+	virtual void move();
+	virtual bool starve() { return false; }
+	virtual int organismType() = 0;
+};
+
+
+
+class Ant :public Organism
+{
+public:
+	Ant() :Organism() {}
+	Ant(GamePtr currGame, int x, int y);
+	void breed();
+	int organismType() { return ANT; } //1 is an ant
+private:
+	int breedTimeCount;
+
+};
+
+class Doodlebug : public Organism
+{
+private:
+	int starveTimer;
+	int breedTimeCount;
+
+public:
+	Doodlebug() :Organism(), starveTimer(0) {}
+	Doodlebug(GamePtr currGame, int x, int y);
+	vector<int> validMovesToAnts(int x, int y)const;
+	bool starve() { return starveTimer == 0; }
+	void move();
+	void breed();
+	int organismType() { return 2; }
+
+};
+
 
 
 
@@ -146,9 +203,9 @@ void Game::printGrid() {
 		{
 			if (worldGrid[x][y] == nullptr)
 				cout << '-';
-			if (worldGrid[x][y]->organismType() == 1)
+			else if (worldGrid[x][y]->organismType() == ANT)
 				cout << 'o';
-			if (worldGrid[x][y]->organismType() == 2)
+			else
 				cout << 'X';
 
 		}
@@ -157,27 +214,6 @@ void Game::printGrid() {
 
 }
 
-
-
-class Organism {
-
-protected:
-	GamePtr currGame;
-	int x;
-	int y;
-	int timeToBreed;
-	int stepCount;
-	bool validCoordinate(int x, int y) const;
-	vector<int> isMoveFree(int x, int y) const;
-	void testCoordinate(int& x, int& y, int move) const;
-public:
-	Organism() :currGame(nullptr), x(0), y(0), timeToBreed(0), stepCount(0) {}
-	Organism(GamePtr currGame, int x, int y);
-	virtual void breed() = 0;
-	virtual void move();
-	virtual bool starve() { return false; }
-	virtual int organismType() = 0;
-};
 
 Organism::Organism(GamePtr currGame, int x, int y) {
 	this->currGame = currGame;
@@ -245,21 +281,10 @@ void Organism::testCoordinate(int& x, int& y, int move) const {
 
 
 
-class Ant :public Organism
-{
-public:
-	Ant() :Organism() {}
-	Ant(GamePtr currGame, int x, int y);
-	void breed();
-	int organismType() { return 1; } //1 is an ant
-private:
-	int breedTimeCount;
-	const int BreedTimer = 3; //Ant breeding time
-};
 
 Ant::Ant(GamePtr currGame, int x, int y) :Organism(currGame, x, y)
 {
-	breedTimeCount = BreedTimer;
+	breedTimeCount = antBreedTimer;
 }
 
 void Ant::breed() {
@@ -271,33 +296,17 @@ void Ant::breed() {
 	int newY = y;
 	testCoordinate(newX, newY, randomMove);
 	currGame->worldGrid[newX][newY] = new Ant(currGame, newX, newY);
-	breedTimeCount = BreedTimer;
+	breedTimeCount = antBreedTimer;
 }
 
 
 
-class Doodlebug : public Organism
-{
-public:
-	Doodlebug() :Organism(), starveTimer(0) {}
-	Doodlebug(GamePtr currGame, int x, int y);
-	vector<int> validMovesToAnts(int x, int y)const;
-	bool starve() { return starveTimer == 0; }
-	void move();
-	void breed();
-	int organismType() { return 2; }
 
-private:
-	int starveTimer;
-	const int doodleStarveTime = 3; //starve time of doodlebug
-	int breedTimeCount;
-	const int BreedTimer = 8; //Doodlebug breeding time
-};
 
 Doodlebug::Doodlebug(GamePtr currGame, int x, int y) :Organism(currGame, x, y)
 {
 	starveTimer = doodleStarveTime;
-	breedTimeCount = BreedTimer;
+	breedTimeCount = doodleBreedTimer;
 }
 
 vector<int> Doodlebug::validMovesToAnts(int x, int y) const {
@@ -347,7 +356,7 @@ void Doodlebug::breed() {
 	int newY = y;
 	testCoordinate(newX, newY, randomMove);
 	currGame->worldGrid[newX][newY] = new Doodlebug(currGame, newX, newY);
-	breedTimeCount = BreedTimer;
+	breedTimeCount = doodleBreedTimer;
 }
 
 
