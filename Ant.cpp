@@ -1,13 +1,5 @@
 #include "Ant.h"
 
-#include <iostream>
-#include <vector>
-#include<string>
-
-#include "Game.h"
-#include "Organism.h"
-#include "Doodlebug.h"
-using namespace std;
 
 Ant::Ant(GamePtr currGame, int x, int y) :Organism(currGame, x, y)
 {

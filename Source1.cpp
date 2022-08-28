@@ -8,6 +8,12 @@
 #include "Doodlebug.h"
 using namespace std;
 
+
+class Game;
+class Organism;
+class Ant;
+class Doodlebug;
+
 //moves
 /*
 const int up = 1;
@@ -16,14 +22,11 @@ const int down = 3;
 const int left = 4;
 */
 
-const int antBreedingTime = 3; //Ant breeding time
-
-
 const int doodleStarveTime = 3; //starve time of doodlebug
-const int doodlebugBreedingTime = 8; //Doodlebug breeding time
+const int doodleBreedTimer = 8; //Doodlebug breeding time
 
 
-const int griddim = 20;
+
 typedef Organism* OrganismPtr;
 typedef Game* GamePtr;
 

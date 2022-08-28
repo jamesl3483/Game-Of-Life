@@ -1,13 +1,15 @@
 #include "Organism.h"
 
-#include <iostream>
-#include <vector>
-#include<string>
 
-#include "Game.h"
-#include "Ant.h"
-#include "Doodlebug.h"
-using namespace std;
+
+Organism::Organism(GamePtr currGame, int x, int y) {
+	this->currGame = currGame;
+	this->x = x;
+	this->y = y;
+	breedTimer = 0;
+	stepCount = currGame->stepCount;
+}
+
 
 void Organism::move() {
 	if (stepCount == currGame->stepCount) return;

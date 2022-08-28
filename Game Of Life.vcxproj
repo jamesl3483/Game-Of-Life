@@ -149,6 +149,7 @@
     <ClInclude Include="Ant.h" />
     <ClInclude Include="Doodlebug.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GlobalVar.h" />
     <ClInclude Include="Organism.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

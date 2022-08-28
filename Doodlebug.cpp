@@ -1,18 +1,12 @@
 #include "Doodlebug.h"
 
-#include <iostream>
-#include <vector>
-#include<string>
 
-#include "Game.h"
-#include "Organism.h"
-#include "Ant.h"
-using namespace std;
+
 
 Doodlebug::Doodlebug(GamePtr currGame, int x, int y) :Organism(currGame, x, y)
 {
 	starveTimer = doodleStarveTime;
-	breedTimer = doodlebugBreedingTime;
+	breedTimeCount = doodleBreedTimer;
 }
 
 vector<int> Doodlebug::validMovesToAnts(int x, int y) const {
@@ -24,15 +18,15 @@ vector<int> Doodlebug::validMovesToAnts(int x, int y) const {
 		testCoordinate(tempX, tempY, move);
 		if (!validCoordinate(tempX, tempY)) continue;
 		if (currGame->worldGrid[tempX][tempY] == nullptr) continue;
-		if (currGame->worldGrid[tempX][tempY]->organismType() == 1) {
+		if (currGame->worldGrid[tempX][tempY]->organismType() == 1)
 			setOfMoves.push_back(move);
-		}
+
 	}
 	return setOfMoves;
 }
 
 void Doodlebug::move() {
-	if (stepCount = currGame->stepCount) return;
+	if (stepCount == currGame->stepCount) return;
 	vector<int> antEatingMove = validMovesToAnts(x, y);
 	if (antEatingMove.size() == 0) {
 		Organism::move();
@@ -54,7 +48,8 @@ void Doodlebug::move() {
 }
 
 void Doodlebug::breed() {
-	if (breedTimer > 0) return;
+	breedTimeCount--;
+	if (breedTimeCount > 0) return;
 	vector<int> validMoves = isMoveFree(x, y);
 	if (validMoves.size() == 0) return;
 	int randomMove = validMoves[currGame->RandNum(0, validMoves.size() - 1)];
@@ -62,5 +57,5 @@ void Doodlebug::breed() {
 	int newY = y;
 	testCoordinate(newX, newY, randomMove);
 	currGame->worldGrid[newX][newY] = new Doodlebug(currGame, newX, newY);
-	breedTimer = doodlebugBreedingTime;
+	breedTimeCount = doodleBreedTimer;
 }

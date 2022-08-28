@@ -1,13 +1,5 @@
-#include <iostream>
-#include <vector>
-#include<string>
-
 #include "Game.h"
-#include "Organism.h"
-#include "Ant.h"
-#include "Doodlebug.h"
-using namespace std;
-using namespace std;
+
 
 Game::Game()
 {
